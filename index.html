@@ -1,0 +1,244 @@
+<!DOCTYPE html <html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>ClockIn</title>
+  <script src="./jsQR.js"></script>
+  <link href="https://fonts.googleapis.com/css?family=Ropa+Sans" rel="stylesheet" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!--Import Google Icon Font-->
+  <!-- <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    /> -->
+  <!-- Compiled and minified CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" />
+  <!-- Compiled and minified JavaScript -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+  <style>
+    body {
+      font-family: "Ropa Sans", sans-serif;
+      color: #333;
+      max-width: 800px;
+      margin: 10 auto;
+      position: relative;
+    }
+
+    #id_wrapper {
+      min-height: 100%;
+      position: relative;
+    }
+
+    #id_footer {
+      padding: 10px;
+      height: 20px;
+      box-sizing: border-box;
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+    }
+
+    #loadingMessage {
+      text-align: center;
+      padding: 40px;
+      background-color: #eee;
+    }
+
+    #canvas {
+      width: 100%;
+    }
+
+    #output {
+      margin-top: 0px;
+      background: #eee;
+      padding: 10px;
+      padding-bottom: 0;
+    }
+
+    #output div {
+      padding-bottom: 0px;
+      word-wrap: break-word;
+    }
+
+    #noQRFound {
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="id_wrapper">
+    <div id="loadingMessage">
+      🎥 Unable to access video stream (please make sure you have a webcam
+      enabled)
+    </div>
+    <canvas id="canvas" hidden></canvas>
+    <div id="output" hidden>
+      <h5>
+        <div id="time" class="center-align"></div>
+      </h5>
+      <div id="outputMessage">No QR code detected.</div>
+      <div hidden><b>Data:</b> <span id="outputData"></span></div>
+      <div id="result" class="center-align"></div>
+      <div id="list" class="center-align"></div>
+    </div>
+    <!-- <footer id="id_footer" align="center">
+      <p class="center-align">
+        Based on cozmo's jsQR, a pre JavaScript QR code decoding library.
+      </p>
+      <a href="https://github.com/cozmo/jsQR" class="center-align">
+        View documentation on Github
+      </a>
+    </footer> -->
+  </div>
+  <script>
+
+  </script>
+  <script>
+    function startClock() {
+      var today = new Date();
+      var month = today.getMonth() + 1;
+      var day = today.getDate();
+      var year = today.getFullYear();
+      if (month < 10) { month = '0' + month; }
+      if (day < 10) { day = '0' + day; }
+      var x = year + '-' + month + '-' + day;
+      var hour = today.getHours();
+      var minute = today.getMinutes();
+      var second = today.getSeconds();
+      if (hour < 10) { hour = '0' + hour; }
+      if (minute < 10) { minute = '0' + minute; }
+      if (second < 10) { second = '0' + second; }
+      var x = x + ' ' + hour + ':' + minute + ':' + second;
+      document.getElementById("time").innerHTML = x;
+      setTimeout(startClock, 1000);
+      changeBackgroundColor(false);
+    }
+    startClock();
+  </script>
+  <script>
+    const API = "https://script.google.com/macros/s/AKfycbyOY47iSfxW5vMA8y62LMJqVFloQr665YkwlH6LXAjT6AAp9W4/exec?key=";
+    var video = document.createElement("video");
+    var canvasElement = document.getElementById("canvas");
+    var canvas = canvasElement.getContext("2d");
+    var loadingMessage = document.getElementById("loadingMessage");
+    var outputContainer = document.getElementById("output");
+    var outputMessage = document.getElementById("outputMessage");
+    var outputData = document.getElementById("outputData");
+    var oldCodes = [];
+
+    function drawLine(begin, end, color) {
+      canvas.beginPath();
+      canvas.moveTo(begin.x, begin.y);
+      canvas.lineTo(end.x, end.y);
+      canvas.lineWidth = 4;
+      canvas.strokeStyle = color;
+      canvas.stroke();
+    }
+
+    // Use facingMode: environment to attemt to get the front camera on phones
+    navigator.mediaDevices
+      .getUserMedia({ video: { facingMode: "environment" } })
+      .then(function (stream) {
+        video.srcObject = stream;
+        video.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
+        video.play();
+        requestAnimationFrame(tick);
+      });
+
+    function tick() {
+      loadingMessage.innerText = "⌛ Loading video...";
+      if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        loadingMessage.hidden = true;
+        canvasElement.hidden = false;
+        outputContainer.hidden = false;
+
+        canvasElement.height = video.videoHeight;
+        canvasElement.width = video.videoWidth;
+        canvas.drawImage(
+          video,
+          0,
+          0,
+          canvasElement.width,
+          canvasElement.height
+        );
+        var imageData = canvas.getImageData(
+          0,
+          0,
+          canvasElement.width,
+          canvasElement.height
+        );
+        var code = jsQR(imageData.data, imageData.width, imageData.height, {
+          inversionAttempts: "dontInvert",
+        });
+        if (code) {
+          drawLine(
+            code.location.topLeftCorner,
+            code.location.topRightCorner,
+            "#FF3B58"
+          );
+          drawLine(
+            code.location.topRightCorner,
+            code.location.bottomRightCorner,
+            "#FF3B58"
+          );
+          drawLine(
+            code.location.bottomRightCorner,
+            code.location.bottomLeftCorner,
+            "#FF3B58"
+          );
+          drawLine(
+            code.location.bottomLeftCorner,
+            code.location.topLeftCorner,
+            "#FF3B58"
+          );
+          outputMessage.hidden = true;
+          outputData.parentElement.hidden = false;
+          outputData.innerText = code.data;
+
+          if (oldCodes.indexOf(code.data) > -1) {
+            document.getElementById("list").innerHTML = "Duplicated" + oldCodes.toString();
+          } else {
+            document.getElementById("list").innerHTML = "submit: " + code.data + " " + oldCodes.toString();
+            oldCodes.push(code.data);
+            changeBackgroundColor(true);
+            submit(code.data);
+          }
+        } else {
+          outputMessage.hidden = false;
+          outputData.parentElement.hidden = true;
+        }
+      }
+      requestAnimationFrame(tick);
+    }
+
+    function changeBackgroundColor(check) {
+      document.body.style.backgroundColor = (check) ? "green" : "white";
+    }
+
+    function submit(code) {
+      var xhr = new XMLHttpRequest();
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+          if (xhr.response["statusCode"] && xhr.response["statusCode"] == 404) {
+            document.getElementById("result").innerHTML = xhr.response.msg;
+            const index = oldCodes.indexOf(code);
+            if (index > -1) {
+              oldCodes.splice(index, 1);
+            }
+          } else {
+            document.getElementById("result").innerHTML = xhr.response;
+            document.getElementById("list").innerHTML = oldCodes.toString();
+          }
+        }
+      }
+      xhr.open('get', API + code, true);
+      xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+      xhr.send();
+      document.getElementById("result").innerHTML = code + " check!";
+    }
+  </script>
+</body>
+
+</html>
