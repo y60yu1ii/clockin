@@ -7,11 +7,6 @@
   <link href="https://fonts.googleapis.com/css?family=Ropa+Sans" rel="stylesheet" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!--Import Google Icon Font-->
-  <!-- <link
-      href="https://fonts.googleapis.com/icon?family=Material+Icons"
-      rel="stylesheet"
-    /> -->
   <!-- Compiled and minified CSS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" />
   <!-- Compiled and minified JavaScript -->
@@ -69,9 +64,9 @@
 
 <body>
   <div id="id_wrapper">
+    <h2>唐卡洛簽到</h2>
     <div id="loadingMessage">
-      🎥 Unable to access video stream (please make sure you have a webcam
-      enabled)
+      🎥 無法偵測到相機
     </div>
     <canvas id="canvas" hidden></canvas>
     <div id="output" hidden>
@@ -83,14 +78,6 @@
       <div id="result" class="center-align"></div>
       <div id="list" class="center-align"></div>
     </div>
-    <!-- <footer id="id_footer" align="center">
-      <p class="center-align">
-        Based on cozmo's jsQR, a pre JavaScript QR code decoding library.
-      </p>
-      <a href="https://github.com/cozmo/jsQR" class="center-align">
-        View documentation on Github
-      </a>
-    </footer> -->
   </div>
   <script>
 
@@ -118,7 +105,7 @@
     startClock();
   </script>
   <script>
-    const API = "https://script.google.com/macros/s/AKfycbyOY47iSfxW5vMA8y62LMJqVFloQr665YkwlH6LXAjT6AAp9W4/exec?key=";
+    const API = "https://script.google.com/macros/s/AKfycbzRXuqbuEQ7bHlkiehzuooYdyXIfIIdGdPrwBWIHq_pBJLMIY7IbcbAC3MDuTHCOmvG/exec?key=";
     var video = document.createElement("video");
     var canvasElement = document.getElementById("canvas");
     var canvas = canvasElement.getContext("2d");
@@ -214,7 +201,8 @@
     }
 
     function changeBackgroundColor(check) {
-      document.body.style.backgroundColor = (check) ? "green" : "white";
+      document.body.style.backgroundColor = (check) ? "#379392" : "#eee";
+      outputContainer.style.backgroundColor = (check) ? "#379392" : "#eee";
     }
 
     function submit(code) {

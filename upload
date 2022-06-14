@@ -1,0 +1,5 @@
+#!/bin/zsh
+aws s3 sync . s3://app.fishare.de/clockin/  --acl public-read --profile=yyl
+aws s3 sync . s3://app.fishare.de/clockin2/  --acl public-read --profile=yyl
+aws cloudfront create-invalidation --distribution-id EHUSSQUUSE0V --paths "/clockin/*" --profile yyl
+aws cloudfront create-invalidation --distribution-id EHUSSQUUSE0V --paths "/clockin2/*" --profile yyl
