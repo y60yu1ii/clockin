@@ -342,6 +342,7 @@ function scan(matrix) {
                 binaryData: decoded.bytes,
                 data: decoded.text,
                 chunks: decoded.chunks,
+                version: decoded.version,
                 location: {
                     topRightCorner: extracted.mappingFunction(location_1.dimension, 0),
                     topLeftCorner: extracted.mappingFunction(0, 0),
@@ -956,6 +957,7 @@ function decode(data, version) {
         text: "",
         bytes: [],
         chunks: [],
+        version: version,
     };
     while (stream.available() >= 4) {
         var mode = stream.readBits(4);
@@ -10080,8 +10082,6 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
         if (!matrix.get(Math.floor(x), Math.floor(y))) {
             return;
         }
-        var lengths = [q.top.endX - q.top.startX, q.bottom.endX - q.bottom.startX, (q.bottom.y - q.top.y + 1)];
-        var size = sum(lengths) / lengths.length;
         var sizeScore = scorePattern({ x: Math.floor(x), y: Math.floor(y) }, [1, 1, 1], matrix);
         var score = sizeScore + distance({ x: x, y: y }, expectedAlignmentPattern);
         return { x: x, y: y, score: score };
